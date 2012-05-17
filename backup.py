@@ -1,50 +1,58 @@
-#!/usr/bin/python
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
 
-import RSyncBackup
-import logging, logging.handlers
-
-LOG_FILE="backup.log"
-LAST_RUN_FILE="backup.lrf"
+import rsyncbackup
+import logging
+import logging.handlers
+import os
+import shlex
 
 # Logging to a file done here
-rootLogger = logging.getLogger()
-loggingHandler = logging.FileHandler (LOG_FILE)
-loggingFormatter = logging.Formatter ('%(asctime)s %(levelname)s %(name)s %(message)s')
-loggingHandler.setFormatter (loggingFormatter)
-rootLogger.setLevel (logging.DEBUG)
-rootLogger.addHandler (loggingHandler)
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
+logging_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s %(message)s')
+logging_handler = logging.handlers.TimedRotatingFileHandler(filename='backup.log', when='D', backupCount=7)
+logging_handler.setFormatter(logging_formatter)
+logging_handler.setLevel(logging.DEBUG)
+root_logger.addHandler(logging_handler)
 
 # Logging to email of any errors
-## emailHandler = logging.handlers.SMTPHandler ("localhost", "backup@rock", ["root@rock"], "Backup error.")
-## emailHandler.setFormatter (loggingFormatter)
-## emailHandler.setLevel (logging.ERROR)
-## rootLogger.addHandler (emailHandler)
+## email_handler = logging.handlers.SMTPHandler("localhost", "backup@rock", ["root@rock"], "Backup error.")
+## email_handler.setFormatter(logging_formatter)
+## email_handler.setLevel(logging.ERROR)
+## root_logger.addHandler(email_handler)
 
-# Create a backup object.  Remove testRun once you've debugged it.
-backup = RSyncBackup.RSyncBackup (lastRunFile = LAST_RUN_FILE, rsync="/usr/bin/rsync", testRun=0)
+# Create a backup object.
+backup = rsyncbackup.RsyncBackup(rsync="/usr/bin/rsync")
+
+rcfile = os.path.join(os.path.dirname(__file__), 'mappings.rc')
+
 try:
-    if (backup.timeToBackup()):
-        # It's time to perform a backup.
-        
-        # Exclude the media directory - it's too large to backup.
-        # Backup all the home directories to /backup/current/ with archives to /backup/archives/
-        # exclude = ['colin/media']
-        #backup.backup (source="/Users/kentaro/tmp1/", destination="/Users/kentaro/tmp2/", archive="/backup/archives/", excludeList=exclude)
-        
-        # Backup MySQL with no archives
-        backup.backup (source="/Users/kentaro/tmp1/", destination="/Users/kentaro/tmp2/")
-        
-        # Only keep 5 days worth of evolution archives - it changes too rapidly and is big!
-        # This demonstrates the use of the filter regular expression - use with great care!
-        #backup.trimArchives ('/backup/archives', filter="evolution$", entriesToKeep=5)
-        
-        # Only keep 60 backups worth of archives for all files
-        backup.trimArchives ('/Users/kentaro/tmp2/', filter="tmp*", entriesToKeep=60)
-        
-        # Backup finished
-        backup.finish()
-except Exception, e:
-    logging.error ("Exception occured during backup: %s" % str (e))
+    f_in = open(rcfile)
+except IOError, (errno, msg):
+    logging.error("Cannot read file %s: %s" % (rcfile, msg))
+
+try:
+    try:
+        dic = {}
+        lex = shlex.shlex(f_in)
+        lex.whitespace_split = True
+        while True:
+            key = lex.get_token()
+            val = lex.get_token()
+            if not key or not val:
+                break
+            dic[key] = val
+            for key, value in dic.iteritems():
+                try:
+                    backup.backup(source=key, destination=value)
+                    backup.trim_archives(removeDir=value)
+                except Exception, e:
+                    logging.error("Exception occured during backup: %s" % str (e))
+    except IOError, (errno, msg):
+        logging.error("Cannot read file %s: %s" % (rcfile, msg))
+finally:
+    f_in.close()
 
 # Close the logging out.
-loggingHandler.close()
+logging_handler.close()
