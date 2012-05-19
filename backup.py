@@ -31,28 +31,28 @@ try:
     f_in = open(rcfile)
 except IOError, (errno, msg):
     logging.error("Cannot read file %s: %s" % (rcfile, msg))
-
-try:
+else:
     try:
-        dic = {}
-        lex = shlex.shlex(f_in)
-        lex.whitespace_split = True
-        while True:
-            key = lex.get_token()
-            val = lex.get_token()
-            if not key or not val:
-                break
-            dic[key] = val
-            for key, value in dic.iteritems():
-                try:
-                    backup.backup(source=key, destination=value)
-                    backup.trim_archives(removeDir=value)
-                except Exception, e:
-                    logging.error("Exception occured during backup: %s" % str (e))
-    except IOError, (errno, msg):
-        logging.error("Cannot read file %s: %s" % (rcfile, msg))
-finally:
-    f_in.close()
+        try:
+            dic = {}
+            lex = shlex.shlex(f_in)
+            lex.whitespace_split = True
+            while True:
+                key = lex.get_token()
+                val = lex.get_token()
+                if not key or not val:
+                    break
+                dic[key] = val
+                for key, value in dic.iteritems():
+                    try:
+                        backup.backup(source=key, destination=value)
+                        backup.trim_archives(removedir=value)
+                    except Exception, e:
+                        logging.error("Exception occured during backup: %s" % str (e))
+        except IOError, (errno, msg):
+            logging.error("Cannot read file %s: %s" % (rcfile, msg))
+    finally:
+        f_in.close()
 
 # Close the logging out.
 logging_handler.close()
