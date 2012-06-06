@@ -10,23 +10,25 @@ import subprocess
 import time
 from datetime import date
 
-class RsyncBackup:
+class AutoTier:
     def __init__(self, rsync="/usr/bin/rsync"):
         """ Creates an object that can perform backups using Rsync.
         rsync         - Specify the location of the rsync binary.
         """
-        self.log = logging.getLogger("RsyncBackup")
+        self.log = logging.getLogger("AutoTier")
         self.rsync = rsync
 
-    def backup(self, source, destination):
+    def sync(self, source, destination, options="-actuvz"):
         """ Perform a backup using rsync.
         source        - The source directory who's contents should be backed up.
         destination   - The directory that the backup should go into.
+        options       - (Optional) Opetions for rsync command.
         Returns true if successful, false if an error occurs.
         """
-        cmnd = "%s '%s' '%s' -acvzut" % (self.rsync, source, destination)
-        args = shlex.split(cmnd)
+        cmd = "%s '%s' '%s' '%s'" % (self.rsync, options, source, destination)
+        args = shlex.split(cmd)
         self.log.debug ("Running command: %s" % args)
+        self.log.info("Start rsync backup: %s" % args)
         backuputil = BackupUtils()
         result = backuputil.get_status_output(args)
         if (result[0] == 0):
@@ -35,14 +37,15 @@ class RsyncBackup:
         else:
             self.log.error("Error running rsync: %s" % result[1])
             return 0
+        self.log.info("Finish rsync backup.")
         return 1
 
     def trim_archives(self, removedir, retention=90):
         """ Delete old archives - This deletes files, be careful with it.
-        removeDir     - The directory which is deleted.
+        removedir     - The directory which is deleted.
         retention     - (Optional) Delete older than this days, defaults to 90.
         """
-        self.log.info("Starting deletion.")
+        self.log.info("Start deletion.")
         limit_timestamp = time.time() - 86400 * retention
         backuputil = BackupUtils()
         for root, dirs, files in backuputil.os_walk_cache_util(removedir):
@@ -53,7 +56,7 @@ class RsyncBackup:
                 if filemtime < limit_timestamp: # Old file
                     try:
                         os.unlink(filepath)
-                        self.log.info("File deletion successful in %s" %
+                        self.log.debug("File deletion successful in %s" %
                                       filepath)
                     except OSError, e:
                         pass
@@ -62,10 +65,11 @@ class RsyncBackup:
                 dirpath = os.path.join(root, dir)
                 try:
                     os.rmdir(dirpath)
-                    self.log.info("Blank Directory deletion successful in %s" %
+                    self.log.debug("Blank Directory deletion successful in %s" %
                                   dirpath)
                 except OSError, e:
                     pass
+        self.log.info("Finish deletion.")
 
 class BackupUtils:
     def get_status_output(self, command):
