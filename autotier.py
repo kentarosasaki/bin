@@ -45,7 +45,7 @@ class AutoTier:
         removedir     - The directory which is deleted.
         retention     - (Optional) Delete older than this days, defaults to 90.
         """
-        self.log.info("Start deletion.")
+        self.log.info("Start deletion: %s" % removedir)
         limit_timestamp = time.time() - 86400 * retention
         backuputil = BackupUtils()
         for root, dirs, files in backuputil.os_walk_cache_util(removedir):
@@ -57,7 +57,7 @@ class AutoTier:
                     try:
                         os.unlink(filepath)
                         self.log.debug("File deletion successful in %s" %
-                                      filepath)
+                                       filepath)
                     except OSError, e:
                         pass
             # Delete blank directories
@@ -66,16 +66,17 @@ class AutoTier:
                 try:
                     os.rmdir(dirpath)
                     self.log.debug("Blank Directory deletion successful in %s" %
-                                  dirpath)
+                                   dirpath)
                 except OSError, e:
                     pass
         self.log.info("Finish deletion.")
+        return 1
 
 class BackupUtils:
     def get_status_output(self, command):
         # Return (status, output) of executing command in a shell.
         pipe = subprocess.Popen(command, universal_newlines=True,
-                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = str.join("", pipe.stdout.readlines())
         status = pipe.wait()
         if status is None:
@@ -93,4 +94,3 @@ class BackupUtils:
                 cache[directory].append(x)
                 yield x
         raise StopIteration()
-
