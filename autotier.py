@@ -63,25 +63,19 @@ class DataSync(object):
             if isinstance(value, dict):
                 self.update(source_item, destination_item, value)
             else:
-                d = os.path.getmtime(source_item) - os.path.getmtime(destination_item)
+                d = os.path.getmtime(source_item) - os.path.getmtime(
+                                                    destination_item)
                 if d > 0:
                     self.log.debug("Update --->: %s" % source_item)
-                    shutil.copy2(source_, destination_item)
-                elif d < 0:
-                    self.log.debug("Update <---: %s" % source_item)
-                    shutil.copy2(destination_, source_item)
+                    shutil.copy2(source_item, destination_item)
         return 1
 
     def synchronize(self, source, destination):
         """ Perform a backup.
-        source        - The source directory who's contents should be backed up.
-        destination   - The directory that the backup should go into.
+        source       - The source directory who's contents should be backed up.
+        destination  - The directory that the backup should go into.
         Returns true if successful, false if an error occurs.
         """
-        if not source.endswith(os.sep):
-            source += os.sep
-        if not destination.endswith(os.sep):
-            destination += os.sep
         self.log.info("Start backup: %s %s" % (source, destination))
         sub = self.subtract
         src = self.listdir(source)
@@ -90,12 +84,10 @@ class DataSync(object):
         common = sub(common, sub(src, dst))
         common = sub(common, sub(dst, src))
         to_dst = sub(src, dst)
-        #to_src = sub(dst, src)
-        #self.copy(destination, source, to_src)
         if not self.copy(source, destination, to_dst):
-            self.log.error("Error running copping: %s %s" % (source, destination))
+            self.log.error("Error copping: %s %s" % (source, destination))
         if not self.update(source, destination, common):
-            self.log.error("Error running updating: %s %s" % (source, destination))
+            self.log.error("Error updating: %s %s" % (source, destination))
         return 1
 
 class TrimArchives(object):
@@ -117,8 +109,8 @@ class TrimArchives(object):
 
     def trimming(self, removedir, retention=90):
         """ Delete old archives - This deletes files, be careful with it.
-        removedir     - The directory which is deleted.
-        retention     - (Optional) Delete older than this days, defaults to 90.
+        removedir - The directory which is deleted.
+        retention - (Optional) Delete older than this days, defaults to 90.
         """
         self.log.info("Start deletion: %s" % removedir)
         limit_timestamp = time.time() - 86400 * retention
