@@ -17,7 +17,7 @@ logging_handler = logging.handlers.TimedRotatingFileHandler(
                   when='D',
                   backupCount=7)
 logging_handler.setFormatter(logging_formatter)
-logging_handler.setLevel(logging.INFO)
+logging_handler.setLevel(logging.DEBUG)
 root_logger.addHandler(logging_handler)
 
 # Create a resource file object.
@@ -39,10 +39,11 @@ def rcfile_to_list(filename):
     return output
 
 # Create a backup object.
-backup = autotier.AutoTier(rsync="/usr/bin/rsync")
+backup = autotier.DataSync()
+delete = autotier.TrimArchives()
 
-[backup.sync(list[0], list[1]) for list in rcfile_to_list(rcfile)]
-[backup.trim_archives(list[1]) for list in rcfile_to_list(rcfile)]
+[backup.synchronize(list[0], list[1]) for list in rcfile_to_list(rcfile)]
+[delete.trimming(list[1]) for list in rcfile_to_list(rcfile)]
 
 # Close the logging out.
 logging_handler.close()
