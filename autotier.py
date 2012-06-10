@@ -44,7 +44,7 @@ class DataSync(object):
 
     def copy(self, source, destination, index):
         if not os.path.exists(destination):
-            self.log.debug("Make directory: %s" % destinatio)
+            self.log.debug("Make directory: %s" % destination)
             os.makedirs(destination)
         for key, value in index.iteritems():
             source_item = os.path.join(source, key)
