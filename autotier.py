@@ -2,10 +2,24 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import logging.handlers
 import os
 import shutil
 import time
 
+
+# Logging to a file done here
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
+logging_formatter = logging.Formatter(
+                    '%(asctime)s %(levelname)s %(name)s %(message)s')
+logging_handler = logging.handlers.TimedRotatingFileHandler(
+                  filename='backup.log',
+                  when='D',
+                  backupCount=7)
+logging_handler.setFormatter(logging_formatter)
+logging_handler.setLevel(logging.DEBUG)
+root_logger.addHandler(logging_handler)
 
 class DataSync(object):
 
@@ -14,6 +28,9 @@ class DataSync(object):
 
     def listdir(self, path):
         ans = {}
+        if not os.path.exists(path):
+            self.log.debug("Make directory: %s" % path)
+            os.makedirs(path)
         for item in os.listdir(path):
             fullpath = os.path.join(path, item)
             if os.path.isdir(fullpath):
