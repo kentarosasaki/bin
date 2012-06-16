@@ -8,18 +8,24 @@ from lib import sync
 from lib import trimming
 
 
-def csv_to_list(filename):
-    return [row for row in filename]
+def csv_to_list(csvname):
+    return [row for row in csvname]
 
 
 def main():
 
+    # Set init file path.
+    initfilepath = os.path.dirname(os.path.abspath(__file__))
+
     # Create a resource file object.
-    csvfile = open(os.path.join("config", "mapping.csv"), 'r')
+    csvfile = open(os.path.join(''.join((initfilepath, os.sep, "config")),
+                   "mapping.csv"), 'r')
     csvloop = csv.reader(csvfile)
 
     # Create a logging file.
-    log.logging_config('backup.log')
+    loggingfile = os.path.join(''.join((initfilepath, os.sep, "log")),
+                               'backup.log')
+    log.logging_config(loggingfile)
 
     # Create objects.
     backup = sync.Sync()

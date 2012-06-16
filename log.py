@@ -4,21 +4,19 @@
 import logging
 import logging.handlers
 import os
-import time
 
 
-def logging_config(conffile):
+def logging_config(loggingfile):
     # Logging to a file done here
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)
-    logging_formatter = logging.Formatter(
-                        '%(asctime)s %(levelname)s %(name)s %(message)s')
-    logging_handler = logging.handlers.TimedRotatingFileHandler(
-                      filename=os.path.join("log", conffile),
-                      when='D',
-                      backupCount=7)
-    logging_handler.setFormatter(logging_formatter)
-    logging_handler.setLevel(logging.DEBUG)
-    root_logger.addHandler(logging_handler)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+                '%(asctime)s %(levelname)s %(name)s %(message)s')
+    handler = logging.handlers.TimedRotatingFileHandler(
+              filename=loggingfile,
+              when='D',
+              backupCount=7)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 
