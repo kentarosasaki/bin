@@ -67,8 +67,12 @@ class Sync(object):
             if isinstance(value, dict):
                 self.copy(source_item, destination_item, value)
             else:
-                self.log.debug("Copy file: %s" % source_item)
-                shutil.copy2(source_item, destination_item)
+                try:
+                    self.log.debug("Copy file: %s" % source_item)
+                    shutil.copy2(source_item, destination_item)
+                except Exception:
+                    self.log.error("Copy error: %s %s" % (source, destination))
+                    pass
         return 1
 
     def update(self, source, destination, index):
@@ -81,8 +85,13 @@ class Sync(object):
                 d = os.path.getmtime(source_item) - os.path.getmtime(
                                                     destination_item)
                 if d > 0:
-                    self.log.debug("Update --->: %s" % source_item)
-                    shutil.copy2(source_item, destination_item)
+                    try:
+                        self.log.debug("Update --->: %s" % source_item)
+                        shutil.copy2(source_item, destination_item)
+                    except Exception:
+                        self.log.error("Update error: %s %s"
+                                       % (source, destination))
+                        pass
         return 1
 
     def sync(self, source, destination):
@@ -99,10 +108,8 @@ class Sync(object):
         common = sub(common, sub(src, dst))
         common = sub(common, sub(dst, src))
         to_dst = sub(src, dst)
-        if not self.copy(source, destination, to_dst):
-            self.log.error("Copy error: %s %s" % (source, destination))
-        if not self.update(source, destination, common):
-            self.log.error("Update error: %s %s" % (source, destination))
+        self.copy(source, destination, to_dst)
+        self.update(source, destination, common)
         return 1
 
 
