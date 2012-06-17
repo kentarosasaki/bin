@@ -57,7 +57,7 @@ class Sync(object):
                 ans[key] = tuple(value)
         return ans
 
-    def copy(self, source, destination, index):
+    def copy(self, source, destination, index, symlinks=0):
         if not os.path.exists(destination):
             self.log.debug("Make directory: %s" % destination)
             os.makedirs(destination)
@@ -67,15 +67,54 @@ class Sync(object):
             if isinstance(value, dict):
                 self.copy(source_item, destination_item, value)
             else:
-                try:
-                    self.log.debug("Copy file: %s" % source_item)
-                    shutil.copy2(source_item, destination_item)
-                except Exception:
-                    self.log.error("Copy error: %s %s" % (source, destination))
-                    pass
+#                try:
+#                    if symlinks and os.path.islink(source_item):
+#                        selfself.log.debug("Make symlink: %s"
+#                                           % destination_item)
+#                        link_to = os.readlink(source_item)
+#                        os.symlink(link_to, destination_item)
+#                    elif os.path.isdir(source_item):
+#                        selfself.log.debug("Copy(copytree) file: %s"
+#                                           % destination_item)
+#                        shutil.copytree(source_item, destination_item, symlinks)
+#                    else:
+#                        selfself.log.debug("Copy(copy2) file: %s"
+#                                           % destination_item)
+#                        shutil.copy2(source_item, destination_item)
+#                except Exception, msg:
+#                    self.log.error("Copy error: %s %s %s"
+#                                   % (source, destination, str(msg)))
+#                    pass
+                if symlinks and os.path.islink(source_item):
+                    try:
+                        selfself.log.debug("Make symlinks: %s"
+                                           % destination_item)
+                        link_to = os.readlink(source_item)
+                        os.symlink(link_to, destination_item)
+                    except Exception, msg:
+                        self.log.error("Make symlinks error: %s %s %s"
+                                       % (source, destination, str(msg)))
+                        pass
+                elif os.path.isdir(source_item):
+                    try:
+                        selfself.log.debug("Copy file: %s"
+                                           % destination_item)
+                        shutil.copytree(source_item, destination_item, symlinks)
+                    except Exception, msg:
+                        self.log.error("Copy error: %s %s %s"
+                                       % (source, destination, str(msg)))
+                        pass
+                else:
+                    try:
+                        self.log.debug("Copy file: %s" % destination_item)
+                        shutil.copy2(source_item, destination_item)
+                    except Exception, msg:
+                        self.log.error("Copy error: %s %s %s"
+                                       % (source, destination, str(msg)))
+                        pass
         return 1
 
-    def update(self, source, destination, index):
+    def update(self, source, destination, index, symlinks=0):
         for key, value in index.iteritems():
             source_item = os.path.join(source, key)
             destination_item = os.path.join(destination, key)
@@ -85,13 +124,33 @@ class Sync(object):
                 d = os.path.getmtime(source_item) - os.path.getmtime(
                                                     destination_item)
                 if d > 0:
+                    if symlinks and os.path.islink(source_item):
+                        try:
+                            selfself.log.debug("Make symlinks: %s"
+                                               % destination_item)
+                            link_to = os.readlink(source_item)
+                            os.symlink(link_to, destination_item)
+                        except Exception, msg:
+                            self.log.error("Make symlinks error: %s %s %s"
+                                           % (source, destination, str(msg)))
+                            pass
+                elif os.path.isdir(source_item):
                     try:
-                        self.log.debug("Update --->: %s" % source_item)
-                        shutil.copy2(source_item, destination_item)
-                    except Exception:
-                        self.log.error("Update error: %s %s"
-                                       % (source, destination))
+                        selfself.log.debug("Update file: %s"
+                                           % destination_item)
+                        shutil.copytree(source_item, destination_item, symlinks)
+                    except Exception, msg:
+                        self.log.error("Update error: %s %s %s"
+                                       % (source, destination, str(msg)))
                         pass
+                    else:
+                        try:
+                            self.log.debug("Update file: %s" % destination_item)
+                            shutil.copy2(source_item, destination_item)
+                        except Exception, msg:
+                            self.log.error("Update error: %s %s %s"
+                                           % (source, destination, str(msg)))
+                            pass
         return 1
 
     def sync(self, source, destination):
