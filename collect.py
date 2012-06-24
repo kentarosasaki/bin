@@ -9,7 +9,8 @@ from lib import trimming
 
 
 def csv_to_list(csvname):
-    return [row for row in csvname]
+    return [row for row in csvname if os.path.isdir(row[0]) and
+                                      os.path.isdir(row[1])]
 
 
 def main():

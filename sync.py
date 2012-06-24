@@ -102,15 +102,15 @@ class Sync(object):
         Returns true if successful, false if an error occurs.
         """
         self.log.info("Start backup: %s %s" % (source, destination))
-        sub = self.subtract
         src = self.listdir(source)
         dst = self.listdir(destination)
-        common = self.merge(src, dst)
-        common = sub(common, sub(src, dst))
-        common = sub(common, sub(dst, src))
-        to_dst = sub(src, dst)
-        self.copy(source, destination, to_dst)
-        self.update(source, destination, common)
+        merge = self.merge(src, dst)
+        src_only = self.subtract(src, dst)
+        dst_only = self.subtract(dst, src)
+        del_src = self.subtract(merge, src_only)
+        common = self.subtract(del_src, dst_only)
+        #self.copy(source, destination, src_only)
+        #self.update(source, destination, common)
         return 1
 
 
