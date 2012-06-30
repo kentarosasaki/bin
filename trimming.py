@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import logging
@@ -41,7 +41,7 @@ class Trimming(object):
                         os.unlink(filepath)
                         self.log.debug("File deletion successful in %s" %
                                        filepath)
-                    except OSError, e:
+                    except OSError as e:
                         pass
             # Delete blank directories
             for dir in dirs:
@@ -50,7 +50,7 @@ class Trimming(object):
                     os.rmdir(dirpath)
                     self.log.debug("Blank Directory deletion successful in %s" %
                                    dirpath)
-                except OSError, e:
+                except OSError as e:
                     pass
         return 1
 

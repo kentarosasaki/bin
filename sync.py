@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import logging
@@ -39,18 +39,18 @@ class Sync(object):
 
     def subtract(self, include, exclude):
         ans = {}
-        for key, value in include.iteritems():
+        for key, value in include.items():
             if isinstance(value,dict):
                 if value != exclude.get(key, None):
                     ans[key] = self.subtract(value, exclude.get(key,{}))
             else:
-                if not exclude.has_key(key):
+                if not key in exclude:
                     ans[key] = tuple(value)
         return ans
 
     def merge(self, include, extend):
         ans = self.subtract(include, {})
-        for key, value in extend.iteritems():
+        for key, value in extend.items():
             if isinstance(value,dict):
                 ans[key] = self.merge(value, include.get(key, {}))
             else:
@@ -61,7 +61,7 @@ class Sync(object):
         if not os.path.exists(destination):
             self.log.debug("Make directory: %s" % destination)
             os.makedirs(destination)
-        for key, value in index.iteritems():
+        for key, value in index.items():
             source_item = os.path.join(source, key)
             destination_item = os.path.join(destination, key)
             if isinstance(value, dict):
@@ -70,14 +70,14 @@ class Sync(object):
                 try:
                     self.log.debug("Copy file: %s" % destination_item)
                     shutil.copy2(source_item, destination_item)
-                except Exception, msg:
+                except Exception as msg:
                     self.log.error("Copy error: %s %s %s"
                                    % (source, destination, str(msg)))
                     pass
         return 1
 
     def update(self, source, destination, index):
-        for key, value in index.iteritems():
+        for key, value in index.items():
             source_item = os.path.join(source, key)
             destination_item = os.path.join(destination, key)
             if isinstance(value, dict):
@@ -85,11 +85,11 @@ class Sync(object):
             else:
                 d = os.path.getmtime(source_item) - os.path.getmtime(
                                                     destination_item)
-                if d > 0:
+                if int(d) > 0:
                     try:
                         self.log.debug("Update file: %s" % destination_item)
                         shutil.copy2(source_item, destination_item)
-                    except Exception, msg:
+                    except Exception as msg:
                         self.log.error("Update error: %s %s %s"
                                        % (source, destination, str(msg)))
                         pass
@@ -109,8 +109,8 @@ class Sync(object):
         dst_only = self.subtract(dst, src)
         del_src = self.subtract(merge, src_only)
         common = self.subtract(del_src, dst_only)
-        #self.copy(source, destination, src_only)
-        #self.update(source, destination, common)
+        self.copy(source, destination, src_only)
+        self.update(source, destination, common)
         return 1
 
 
