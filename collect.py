@@ -3,6 +3,8 @@
 
 import csv
 import os
+import sys
+
 from lib import log
 from lib import sync
 from lib import trimming
@@ -19,8 +21,16 @@ def main():
     initfilepath = os.path.dirname(os.path.abspath(__file__))
 
     # Create a resource file object.
-    csvfile = open(os.path.join(''.join((initfilepath, os.sep, "config")),
-                   "mapping.csv"), 'r')
+    if not len(sys.argv) == 2:
+        sys.exit('Usage: %s mappingfile' % sys.argv[0])
+
+    mappingfile = os.path.join(''.join((initfilepath, os.sep, "config")),
+                               sys.argv[1])
+
+    if not os.path.exists(mappingfile):
+        sys.exit('ERROR: Mapping File %s was not found!' % mappingfile)
+
+    csvfile = open(mappingfile, 'r')
     csvloop = csv.reader(csvfile)
 
     # Create a logging file.

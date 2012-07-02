@@ -26,9 +26,6 @@ class Sync(object):
 
     def listdir(self, path):
         ans = {}
-        if not os.path.exists(path):
-            self.log.debug("Make directory: %s" % path)
-            os.makedirs(path)
         for item in self.os_listdir_cache(path):
             fullpath = os.path.join(path, item)
             if os.path.isdir(fullpath):
