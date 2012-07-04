@@ -3,6 +3,7 @@
 
 import csv
 import os
+import socket
 import sys
 
 from lib import log
@@ -34,8 +35,10 @@ def main():
     csvloop = csv.reader(csvfile)
 
     # Create a logging file.
+    host = socket.gethostname()
+    loggingfilename = ''.join(("backup_", host, ".log"))
     loggingfile = os.path.join(''.join((initfilepath, os.sep, "log")),
-                               'backup.log')
+                               loggingfilename)
     log.logging_config(loggingfile)
 
     # Create objects.
