@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import csv
+import fcntl
 import os
 import sys
 
@@ -34,5 +35,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    with open(sys.argv[0], 'r') as lockFile:
+        fcntl.flock(lockFile.fileno(), fcntl.LOCK_EX)
+        main()
 
