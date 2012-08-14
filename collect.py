@@ -1,5 +1,5 @@
-#!/usr/local/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/local/bin/python3
+# coding=utf-8
 
 import csv
 import fcntl
@@ -24,18 +24,19 @@ def main():
                                 sys.argv[1])
     if not os.path.exists(mapping_file):
         sys.exit('ERROR: CSV File %s was not found!' % mapping_file)
-    csv_file = open(mapping_file, 'r')
-    csv_loop = csv.reader(csv_file)
     # Create a object.
     backup = bkutil.BackupCollector()
-    # Perform a backup.
-    [(backup.run(path[0], path[1])) for path in csv_to_list(csv_loop)]
-    # Close csv file.
-    csv_file.close()
+    # Open csv file.
+    with open(mapping_file, 'r') as csv_file:
+        csv_loop = csv.reader(csv_file)
+        # Perform a backup.
+        [(backup.run(item[0], item[1], item[2])) if len(item) == 3
+          else (backup.run(item[0], item[1])) for item in csv_to_list(csv_loop)]
+
 
 
 if __name__ == '__main__':
-    with open(sys.argv[0], 'r') as lockFile:
-        fcntl.flock(lockFile.fileno(), fcntl.LOCK_EX)
+    with open(sys.argv[0], 'r') as lockfile:
+        fcntl.flock(lockfile.fileno(), fcntl.LOCK_EX)
         main()
 
