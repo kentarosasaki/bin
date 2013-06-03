@@ -1,8 +1,44 @@
-#!/bin/sh
+#!/usr/bin/env python3
+# coding=utf-8
 
-if [ -n "${1}" ]
-then
-  screen -t "${1}" ssh -A ${1}
-else
-  echo "usage: ${0} hostname"
-fi
+
+__author__ = "Kentaro Sasaki"
+
+
+import argparse
+import subprocess
+import sys
+
+
+SCREEN_CMD = "/usr/bin/screen -t"
+SSH_CMD = "/usr/bin/ssh -A"
+
+
+def exec_call(cmd):
+    return subprocess.check_call(cmd, shell=True)
+
+
+def sssh(host):
+    return ("%s %s %s %s" % (SCREEN_CMD, host, SSH_CMD, host))
+
+
+def executor(host):
+    try:
+        exec_call(sssh(host))
+    except Exception as msg:
+        print("%s" % str(msg))
+        pass
+
+def option():
+    parser = argparse.ArgumentParser(description='ssh with screen')
+    parser.add_argument('host', type=str, default=sys.stdin)
+    return parser.parse_args()
+
+
+def main():
+    args = option()
+    executor(args.host)
+
+
+if __name__ == '__main__':
+    main()
