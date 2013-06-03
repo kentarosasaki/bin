@@ -1,5 +1,0 @@
-rsync: -avzut
-
-mappings:
-  /Users/kentaro/tmp1: /Users/kentaro/tmp8/
-  /Users/kentaro/tmp3: /Users/kentaro/tmp4
