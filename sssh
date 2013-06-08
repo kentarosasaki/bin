@@ -2,7 +2,8 @@
 # coding=utf-8
 
 
-__author__ = "Kentaro Sasaki"
+__author__ = 'Kentaro Sasaki'
+__copyright__ = 'Copyright 2013 Kentaro Sasaki'
 
 
 import argparse
@@ -10,35 +11,68 @@ import subprocess
 import sys
 
 
-SCREEN_CMD = "/usr/bin/screen -t"
-SSH_CMD = "/usr/bin/ssh -A"
-
-
 def exec_call(cmd):
-    return subprocess.check_call(cmd, shell=True)
+  """Execute function.
+
+  Args:
+    cmd: command line strings from sssh function.
+
+  Returns:
+    Truth value of command line result.
+  """
+  return subprocess.check_call(cmd, shell=True)
 
 
 def sssh(host):
-    return ("%s %s %s %s" % (SCREEN_CMD, host, SSH_CMD, host))
+  """Command line strings.
+
+  Args:
+    host: host name to do ssh.
+
+  Returns:
+    Strings for running ssh with screen.
+  """
+  return ('/usr/bin/screen -t %s usr/bin/ssh -A %s' % (host, host))
 
 
 def executor(host):
-    try:
-        exec_call(sssh(host))
-    except Exception as msg:
-        print("%s" % str(msg))
-        pass
+  """Exception handler for running execute function.
+
+  This uses exec_call function to run sssh function.
+
+  Args
+    host: host name to do ssh.
+  """
+  try:
+    exec_call(sssh(host))
+  except Exception as msg:
+    print('%s' % str(msg))
+    pass
+
 
 def option():
-    parser = argparse.ArgumentParser(description='ssh with screen')
-    parser.add_argument('host', type=str, default=sys.stdin)
-    return parser.parse_args()
+  """Get host name from command line.
+
+  This gets host name from sys.stdin using argparse module.
+
+  Returns:
+    Option to get host name.
+  """
+  parser = argparse.ArgumentParser(description='ssh with screen')
+  parser.add_argument('host', type=str, default=sys.stdin)
+  return parser.parse_args()
 
 
 def main():
-    args = option()
-    executor(args.host)
+  """Run ssh with screen.
+
+  This runs ssh, at the same time this runs screen.
+  You can use option to set the host name or IP address.
+
+  """
+  args = option()
+  executor(args.host)
 
 
 if __name__ == '__main__':
-    main()
+  main()
