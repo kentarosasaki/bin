@@ -32,7 +32,7 @@ def sssh(host):
   Returns:
     Strings for running ssh with screen.
   """
-  return ('/usr/bin/screen -t %s usr/bin/ssh -A %s' % (host, host))
+  return ('/usr/bin/screen -t %s /usr/bin/ssh -A %s' % (host, host))
 
 
 def executor(host):
@@ -60,6 +60,7 @@ def option():
   """
   parser = argparse.ArgumentParser(description='ssh with screen')
   parser.add_argument('host', type=str, default=sys.stdin)
+
   return parser.parse_args()
 
 
@@ -70,8 +71,7 @@ def main():
   You can use option to set the host name or IP address.
 
   """
-  args = option()
-  executor(args.host)
+  executor(option().host)
 
 
 if __name__ == '__main__':
