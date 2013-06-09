@@ -40,7 +40,7 @@ def executor(host):
 
   This uses exec_call function to run sssh function.
 
-  Args
+  Args:
     host: host name to do ssh.
   """
   try:
