@@ -83,11 +83,10 @@ def main():
   # Define log timestamp
   log_timestamp = (os.stat(sys.argv[1])).st_mtime
   now = datetime.datetime.now()
-  d = now - datetime.timedelta(hours = 1)
-  one_hour_ago = time.mktime(d.timetuple())
+  an_hour_ago = time.mktime((now - datetime.timedelta(hours = 1)).timetuple())
 
   # Open log when timestamp is within 1 hour.
-  if log_timestamp > one_hour_ago:
+  if log_timestamp > an_hour_ago:
     with open(sys.argv[1], "r") as f:
       access_list = [ln[:-1].split("\t") for ln in f]
   else:
@@ -101,7 +100,7 @@ def main():
 
   # Generate list which has set by bucket name.
   bucket_list = set([l.bucket_name for l in access_log_list])
-  aggr_res = map(aggr.bucket_aggregate, bucket_list)
+  aggr_res = [aggr.bucket_aggregate(m) for m in bucket_list]
 
   with open("data.json", "w") as fp:
     json.dump(list2dict(aggr_res), fp, sort_keys=True)
