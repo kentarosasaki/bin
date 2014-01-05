@@ -13,7 +13,9 @@ PATH=${1}
 #done
 
 i=1
-for f in ${PATH}/*.jpg
+FLIST=`/usr/bin/find ${PATH} -type f -name "*.jpg"`
+#for f in ${PATH}/*.jpg
+for f in ${FLIST}
 do
   g=0000$i.jpg
   /bin/mv $f ${PATH}/${g:(-9)}
